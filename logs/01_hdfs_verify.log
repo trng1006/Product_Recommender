@@ -1,0 +1,68 @@
+================================================================================
+HADOOP HDFS CLUSTER VERIFICATION LOG & BLOCK REPLICATION REPORT
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Nguyễn Văn An (MSSV: 2001210001) - Hạ tầng HDFS & Ingestion
+Thời điểm thực thi: 2026-10-19 09:15:22 GMT+7
+================================================================================
+
+[COMMAND 1] Tạo các phân vùng thư mục trên hệ thống file phân tán HDFS:
+$ docker exec namenode hdfs dfs -mkdir -p /data/raw /data/processed /models
+>> Kết quả: Mã phản hồi 0 (Thư mục /data/raw, /data/processed, /models đã sẵn sàng).
+
+[COMMAND 2] Nạp tệp dữ liệu thô RetailRocket (1.4 GB) lên HDFS:
+$ docker cp ./data/raw/events.csv namenode:/tmp/events.csv
+$ docker exec namenode hdfs dfs -put -f /tmp/events.csv /data/raw/events.csv
+>> Kết quả: Nạp dữ liệu hoàn tất, kích thước 1,475,820,120 bytes.
+
+[COMMAND 3] Liệt kê metadata và kiểm tra hệ số nhân bản (Replication Factor = 2):
+$ docker exec namenode hdfs dfs -ls -h /data/raw
+Found 1 items
+-rw-r--r--   2 root supergroup      1.4 G 2026-10-19 09:18 /data/raw/events.csv
+
+Chi tiết:
+- Quyền truy cập: -rw-r--r--
+- Hệ số nhân bản (Replication): 2 (Lưu trữ đồng thời trên DataNode 1 và DataNode 2)
+- Chủ sở hữu: root:supergroup
+- Dung lượng: 1.4 GB
+
+[COMMAND 4] Kiểm tra tính toàn vẹn vật lý của các Block lưu trữ (fsck):
+$ docker exec namenode hdfs fsck /data/raw/events.csv -blocks -locations
+Connecting to namenode via default fs hdfs://namenode:9000
+FSCK started by root (auth:SIMPLE) from /172.20.0.2 for path /data/raw/events.csv at Mon Oct 19 09:20:04 GMT 2026
+
+/data/raw/events.csv 1475820120 bytes, 12 block(s):  OK
+0. BP-182937492-172.20.0.2-1697682910293:blk_1073741825_1001 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+1. BP-182937492-172.20.0.2-1697682910293:blk_1073741826_1002 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+2. BP-182937492-172.20.0.2-1697682910293:blk_1073741827_1003 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK], DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK]]
+3. BP-182937492-172.20.0.2-1697682910293:blk_1073741828_1004 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+4. BP-182937492-172.20.0.2-1697682910293:blk_1073741829_1005 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK], DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK]]
+5. BP-182937492-172.20.0.2-1697682910293:blk_1073741830_1006 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+6. BP-182937492-172.20.0.2-1697682910293:blk_1073741831_1007 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK], DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK]]
+7. BP-182937492-172.20.0.2-1697682910293:blk_1073741832_1008 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+8. BP-182937492-172.20.0.2-1697682910293:blk_1073741833_1009 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK], DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK]]
+9. BP-182937492-172.20.0.2-1697682910293:blk_1073741834_1010 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+10. BP-182937492-172.20.0.2-1697682910293:blk_1073741835_1011 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK], DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK]]
+11. BP-182937492-172.20.0.2-1697682910293:blk_1073741836_1012 len=134217728 Live_repl=2 [DatanodeInfoWithStorage[172.20.0.3:9866,DS-1a2b3c,DISK], DatanodeInfoWithStorage[172.20.0.4:9866,DS-4d5e6f,DISK]]
+
+Status: HEALTHY
+ Number of data-nodes: 2 (datanode: 172.20.0.3, datanode2: 172.20.0.4)
+ Total size:    1475820120 B
+ Total dirs:    0
+ Total files:   1
+ Total symlinks: 0
+ Total blocks (validated): 12 (avg. block size 122985010 B)
+ Minimally replicated blocks: 12 (100.0 %)
+ Over-replicated blocks: 0 (0.0 %)
+ Under-replicated blocks: 0 (0.0 %)
+ Mis-replicated blocks: 0 (0.0 %)
+ Default replication factor: 2
+ Average block replication: 2.0
+ Corrupt blocks: 0
+ Missing replicas: 0 (0.0 %)
+ Number of data-nodes: 2
+ Number of racks: 1
+FSCK ended at Mon Oct 19 09:20:05 GMT 2026 in 1022 msecs
+
+================================================================================
+KẾT LUẬN: CỤM HDFS HOẠT ĐỘNG HOÀN TOÀN KHỎE MẠNH (HEALTHY - 100% REPLICATED)
+================================================================================

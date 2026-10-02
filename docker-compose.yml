@@ -1,8 +1,116 @@
-# File cấu hình Hadoop/Spark cluster bằng Docker Compose
-# Nhóm sẽ bổ sung cấu hình image tại đây
-version: '3'
 services:
-  # spark-master:
-  # spark-worker:
-  # hadoop-namenode:
-  # hadoop-datanode:
+  # ==========================================
+  # HADOOP CLUSTER
+  # ==========================================
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    restart: always
+    ports:
+      - "9870:9870"
+      - "9000:9000"
+    volumes:
+      - hadoop_namenode:/hadoop/dfs/name
+    environment:
+      - CLUSTER_NAME=test
+    env_file:
+      - ./hadoop.env
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    restart: always
+    volumes:
+      - hadoop_datanode:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    restart: always
+    volumes:
+      - hadoop_datanode2:/hadoop/dfs/data
+    environment:
+      SERVICE_PRECONDITION: "namenode:9870"
+    env_file:
+      - ./hadoop.env
+
+  # ==========================================
+  # SPARK CLUSTER
+  # ==========================================
+  spark-master:
+    image: bde2020/spark-master:3.1.1-hadoop3.2
+    container_name: spark-master
+    ports:
+      - "8080:8080" # Spark Web UI
+      - "7077:7077" # Spark Master URL
+    volumes:
+      - ./data:/spark/data
+      - ./scripts:/spark/scripts
+      - ./notebooks:/spark/notebooks
+      - ./models:/spark/models
+    environment:
+      - INIT_DAEMON_STEP=setup_spark
+    env_file:
+      - ./hadoop.env
+
+  spark-worker:
+    image: bde2020/spark-worker:3.1.1-hadoop3.2
+    container_name: spark-worker
+    depends_on:
+      - spark-master
+    ports:
+      - "8081:8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+    volumes:
+      - ./data:/spark/data
+      - ./scripts:/spark/scripts
+      - ./models:/spark/models
+
+  spark-worker-2:
+    image: bde2020/spark-worker:3.1.1-hadoop3.2
+    container_name: spark-worker-2
+    depends_on:
+      - spark-master
+    ports:
+      - "8082:8081"
+    environment:
+      - "SPARK_MASTER=spark://spark-master:7077"
+    volumes:
+      - ./data:/spark/data
+      - ./scripts:/spark/scripts
+      - ./models:/spark/models
+
+  # ==========================================
+  # AIRFLOW ORCHESTRATION PIPELINE
+  # (Khởi chạy khi máy host có từ 8GB RAM trở lên)
+  # ==========================================
+  airflow:
+    image: apache/airflow:2.7.1-python3.9
+    container_name: airflow-scheduler
+    restart: always
+    depends_on:
+      - namenode
+      - spark-master
+    ports:
+      - "8089:8080" # Airflow Web UI cổng 8089 (tránh trùng cổng 8080 của Spark Master)
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./scripts:/opt/airflow/scripts
+      - ./logs:/opt/airflow/logs
+      - ./data:/opt/airflow/data
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - AIRFLOW__CORE__LOAD_EXAMPLES=False
+      - AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION=False
+      - AIRFLOW__WEBSERVER__SECRET_KEY=huit_bigdata_airflow_secret_key_2026
+    command: standalone
+
+volumes:
+  hadoop_namenode:
+  hadoop_datanode:
+  hadoop_datanode2:
