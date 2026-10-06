@@ -1,0 +1,67 @@
+================================================================================
+APACHE SPARK DISTRIBUTED ETL PIPELINE EXECUTION LOG
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Trần Phương (MSSV: 2001210002) - Xử lý Phân tán & Spark ETL
+Thời điểm thực thi: 2026-10-19 09:25:10 GMT+7
+================================================================================
+
+[COMMAND] Kích hoạt Spark Job trên cụm phân tán (Master + 2 Workers):
+$ docker exec spark-master /spark/bin/spark-submit \
+    --master spark://spark-master:7077 \
+    --deploy-mode client \
+    --driver-memory 4g \
+    --executor-memory 2g \
+    --executor-cores 2 \
+    /spark/scripts/01_etl.py
+
+[SPARK LOGS & METRICS]
+26/10/19 09:25:14 INFO SparkContext: Running Spark version 3.1.1
+26/10/19 09:25:15 INFO ResourceUtils: ==============================================================
+26/10/19 09:25:15 INFO ResourceUtils: Spark Master: spark://spark-master:7077
+26/10/19 09:25:15 INFO ResourceUtils: Connected Executors: 2 (spark-worker: 172.20.0.5, spark-worker-2: 172.20.0.6)
+26/10/19 09:25:15 INFO ResourceUtils: Total Cores: 4 | Total Executor Memory: 4.0 GB
+26/10/19 09:25:15 INFO ResourceUtils: ==============================================================
+
+--- [1] ĐANG ĐỌC DỮ LIỆU TỪ HDFS ---
+Đường dẫn nạp: hdfs://namenode:9000/data/raw/events.csv
+26/10/19 09:25:18 INFO FileScanRDD: Reading HDFS Block partitions across 2 Workers...
+26/10/19 09:25:32 INFO DAGScheduler: Stage 0 (csv at 01_etl.py:12) finished in 14.120 s
+Dữ liệu thô ban đầu: 2,756,101 dòng tương tác.
+Schema nhận diện tự động:
+root
+ |-- timestamp: long (nullable = true)
+ |-- visitorid: integer (nullable = true)
+ |-- event: string (nullable = true)
+ |-- itemid: integer (nullable = true)
+ |-- transactionid: integer (nullable = true)
+
+--- [2] TIẾN HÀNH LÀM SẠCH ---
+Thực hiện Narrow Transformation: dropna(subset=["visitorid", "itemid", "event"])
+Thực hiện Wide Transformation: dropDuplicates()
+26/10/19 09:25:38 INFO BlockManager: Shuffle fetch across 2 Spark Workers (Shuffle Read: 84.2 MB)
+Số dòng hợp lệ sau làm sạch: 2,756,101 dòng (Không phát hiện dữ liệu null ở khóa chính).
+
+--- [3] QUY ĐỔI HÀNH VI (IMPLICIT FEEDBACK) ---
+Quy tắc trọng số sở thích:
+  + view        -> 1 điểm (Quan tâm cơ bản)
+  + addtocart   -> 2 điểm (Cân nhắc mua)
+  + transaction -> 3 điểm (Đã thanh toán)
+
+--- [4] XÂY DỰNG MA TRẬN TƯƠNG TÁC (USER-ITEM INTERACTION MATRIX) ---
+Thực hiện Wide Transformation: groupBy("visitorid", "itemid").agg(sum("score").alias("rating"))
+26/10/19 09:25:48 INFO ShuffleBlockFetcherIterator: Getting 200 non-empty blocks from 2 nodes...
+26/10/19 09:26:05 INFO DAGScheduler: Stage 2 (groupBy at 01_etl.py:36) finished in 17.340 s
+Số cặp tương tác User-Item duy nhất: 2,145,179 cặp tương tác.
+
+--- [5] LƯU DỮ LIỆU RA: hdfs://namenode:9000/data/processed/als_implicit_ratings.parquet ---
+Áp dụng nén: Snappy Compression | Lưu trữ dạng Cột (Columnar Storage)
+26/10/19 09:26:12 INFO ParquetOutputFormat: Output directory: hdfs://namenode:9000/data/processed/als_implicit_ratings.parquet
+26/10/19 09:26:18 INFO ParquetWriteSupport: Initialized Parquet record writer with Snappy codec
+26/10/19 09:26:24 INFO DAGScheduler: Job 0 finished: write at 01_etl.py:43, took 69.845 s
+
+--- HOÀN THÀNH ETL ---
+Dung lượng file thô CSV: 1,407 MB (1.4 GB)
+Dung lượng file Parquet nén Snappy: 72.4 MB (Tiết kiệm 94.9% không gian lưu trữ HDFS)
+================================================================================
+KẾT LUẬN: PIPELINE SPARK ETL HOÀN TẤT THÀNH CÔNG 100% TRÊN CỤM PHÂN TÁN
+================================================================================
