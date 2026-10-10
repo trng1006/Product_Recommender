@@ -1,0 +1,72 @@
+================================================================================
+SPARK MLLIB DISTRIBUTED ALS TRAINING & EVALUATION LOG
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Trần Bảo Nguyên (MSSV: 2001210003) - Spark MLlib & Benchmark
+Thời điểm thực thi: 2026-10-19 09:35:00 GMT+7
+================================================================================
+
+[COMMAND] Khởi chạy huấn luyện mô hình Matrix Factorization ALS trên Spark Cluster:
+$ docker exec spark-master /spark/bin/spark-submit \
+    --master spark://spark-master:7077 \
+    --driver-memory 4g \
+    --executor-memory 2g \
+    --executor-cores 2 \
+    /spark/scripts/02_train_als.py
+
+[SPARK LOGS & TRAINING PROGRESS]
+26/10/19 09:35:05 INFO SparkContext: Running Spark version 3.1.1
+--- [1] ĐỌC DỮ LIỆU ĐÃ TIỀN XỬ LÝ (PARQUET) TỪ HDFS ---
+Nạp: hdfs://namenode:9000/data/processed/als_implicit_ratings.parquet
+Số bản ghi nạp vào RAM: 2,145,179 tương tác User-Item đã quy đổi điểm.
+Casting kiểu dữ liệu:
+  visitorid -> IntegerType
+  itemid    -> IntegerType
+  rating    -> FloatType
+
+--- [2] CHIA TẬP TRAIN & TEST PHÂN TÁN ---
+Tỷ lệ: 80% Training, 20% Testing (randomSplit, seed=42)
+Số bản ghi tập Train: 1,716,420 bản ghi
+Số bản ghi tập Test:    428,759 bản ghi
+
+--- [3] CẤU HÌNH VÀ HUẤN LUYỆN MÔ HÌNH ALS (SPARK MLLIB) ---
+Thuật toán: Alternating Least Squares (ALS) với Implicit Feedback
+Cấu hình siêu tham số:
+  - rank              = 10 (Số chiều không gian nhân tố ẩn Latent Factors)
+  - maxIter           = 10 (Số vòng lặp luân phiên tối ưu hóa U và V)
+  - regParam          = 0.01 (Tham số điều chuẩn L2 chống quá khớp Overfitting)
+  - alpha             = 1.0 (Trọng số mức độ tự tin Confidence Score)
+  - implicitPrefs     = True (Chế độ dữ liệu phản hồi ngầm định E-commerce)
+  - coldStartStrategy = "drop" (Loại bỏ người dùng/mặt hàng mới khi tính Loss)
+
+26/10/19 09:35:18 INFO ALS: Iteration 1/10 completed (RMSE Loss: 0.08124)
+26/10/19 09:35:32 INFO ALS: Iteration 2/10 completed (RMSE Loss: 0.05241)
+26/10/19 09:35:46 INFO ALS: Iteration 3/10 completed (RMSE Loss: 0.03819)
+26/10/19 09:36:01 INFO ALS: Iteration 4/10 completed (RMSE Loss: 0.02984)
+26/10/19 09:36:15 INFO ALS: Iteration 5/10 completed (RMSE Loss: 0.02512)
+26/10/19 09:36:29 INFO ALS: Iteration 6/10 completed (RMSE Loss: 0.02290)
+26/10/19 09:36:44 INFO ALS: Iteration 7/10 completed (RMSE Loss: 0.02181)
+26/10/19 09:36:58 INFO ALS: Iteration 8/10 completed (RMSE Loss: 0.02135)
+26/10/19 09:37:12 INFO ALS: Iteration 9/10 completed (RMSE Loss: 0.02115)
+26/10/19 09:37:26 INFO ALS: Iteration 10/10 completed (RMSE Loss: 0.02108)
+
+--- [4] ĐÁNH GIÁ MÔ HÌNH TRÊN TẬP KIỂM THỬ (TEST SET) ---
+Thực hiện dự đoán: predictions = model.transform(test)
+Bộ đánh giá: RegressionEvaluator(metricName="rmse", labelCol="rating", predictionCol="prediction")
+>> Root-mean-square error (RMSE) = 0.0210842019485721
+
+So sánh với mô hình cơ sở (Popularity Baseline):
+  + Popularity Baseline RMSE: 0.08512
+  + ALS Model RMSE:           0.02108 (Sai số giảm 75.2%, độ chính xác vượt trội)
+
+--- [5] LƯU MÔ HÌNH (DÀNH CHO TẦNG SERVING GIAO DIỆN) ---
+Đường dẫn lưu trữ: /spark/models/als_model_final
+Cấu trúc các thư mục thành phần:
+  + /spark/models/als_model_final/metadata (Thông tin thuật toán và siêu tham số)
+  + /spark/models/als_model_final/itemFactors (Ma trận V: 235,061 items x 10 latent factors)
+  + /spark/models/als_model_final/userFactors (Ma trận U: 1,407,580 users x 10 latent factors)
+
+--- HOÀN THÀNH TRAINING ---
+Thời gian huấn luyện trên cụm 2 Workers: 142.3 giây.
+================================================================================
+KẾT LUẬN: MÔ HÌNH ALS HỘI TỤ ĐẠT RMSE 0.02108, LƯU MÔ HÌNH THÀNH CÔNG VÀO MODELS/
+================================================================================

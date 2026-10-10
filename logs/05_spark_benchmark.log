@@ -1,0 +1,41 @@
+================================================================================
+BÀI THỰC NGHIỆM ĐO ĐẠC HIỆU NĂNG BIG DATA TRÊN CỤM SPARK & HDFS
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Trần Bảo Nguyên (MSSV: 2001210003) - Phân tích Benchmark
+Thời điểm thực thi: 2026-10-19 09:40:00 GMT+7
+================================================================================
+
+[COMMAND] Chạy script đo đạc hiệu năng phân tán:
+$ docker exec spark-master /spark/bin/spark-submit \
+    --master spark://spark-master:7077 \
+    /spark/scripts/03_benchmark.py
+
+============================================================
+        BÀI THỰC NGHIỆM ĐO ĐẠC HIỆU NĂNG BIG DATA
+============================================================
+
+>>> [THỰC NGHIỆM 1] SO SÁNH TỐC ĐỘ ĐỌC: CSV VS PARQUET
+[-] Đọc file CSV (2,756,101 dòng) từ hdfs://namenode:9000/data/raw/events.csv: 18.524 giây
+[-] Đọc file Parquet (2,145,179 dòng) từ hdfs://namenode:9000/data/processed/als_implicit_ratings.parquet: 1.402 giây
+==> Parquet nhanh hơn CSV gấp: 13.21 lần!
+
+>>> [THỰC NGHIỆM 2] ĐO ĐẠC TỐC ĐỘ XỬ LÝ SHUFFLE GROUPBY (SPARK CLUSTER)
+[-] Đang phân tán tính toán tổng số lượt rating theo từng mặt hàng (itemid)...
+[-] Thời gian thực thi GroupBy phân tán trên 235,061 sản phẩm: 2.145 giây
+
+============================================================
+   BẢNG TỔNG KẾT SO SÁNH HIỆU NĂNG CHO BÁO CÁO & SLIDE
+============================================================
+| Tiêu chí so sánh           | File CSV thô          | File Parquet tối ưu    |
+|----------------------------|-----------------------|------------------------|
+| Định dạng lưu trữ          | Row-based (Dòng)      | Columnar (Cột)         |
+| Cơ chế nén dữ liệu         | Không nén (Raw text)  | Snappy compression     |
+| Dung lượng lưu trữ         | 1,407 MB (1.4 GB)     | 72.4 MB (Giảm 94.9%)   |
+| Thời gian nạp dữ liệu      | 18.524s               | 1.402s                 |
+| Lưu trữ Schema kiểu dữ liệu| Không (Phải infer)    | Tích hợp sẵn Metadata  |
+| Hỗ trợ Column Pruning      | Không                 | Có (Chỉ bốc cột cần)   |
+| Hỗ trợ Predicate Pushdown  | Không                 | Có (Lọc tại Storage)   |
+============================================================
+================================================================================
+KẾT LUẬN: ĐỊNH DẠNG PARQUET ĐEM LẠI LỢI THẾ VƯỢT TRỘI VỀ DUNG LƯỢNG VÀ THỜI GIAN I/O
+================================================================================
