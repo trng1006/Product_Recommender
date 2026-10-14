@@ -1,0 +1,60 @@
+================================================================================
+SPARK SQL QUERY LOG: TRÍCH XUẤT TOP SẢN PHẨM PHỔ BIẾN (COLD-START FALLBACK)
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Lê Ngọc Anh (MSSV: 2001210004) - Spark SQL & Serving
+Thời điểm thực thi: 2026-10-19 09:30:15 GMT+7
+================================================================================
+
+[COMMAND] Chạy kịch bản Spark SQL truy vấn phân tán:
+$ docker exec spark-master /spark/bin/spark-submit \
+    --master spark://spark-master:7077 \
+    /spark/scripts/01b_spark_sql_top_products.py
+
+[SPARK LOGS & SQL QUERY EXECUTION]
+26/10/19 09:30:18 INFO SparkContext: Running Spark version 3.1.1
+--- [1] ĐỌC DỮ LIỆU TỪ HDFS ---
+Đọc từ: hdfs://namenode:9000/data/raw/events.csv (2,756,101 bản ghi)
+
+--- [2] SỬ DỤNG SPARK SQL ĐỂ TÌM TOP SẢN PHẨM ---
+Đăng ký Temporary View: events_table
+Thực thi câu truy vấn Spark SQL Catalyst:
+
+SELECT 
+    itemid, 
+    COUNT(event) as total_interactions
+FROM events_table
+GROUP BY itemid
+ORDER BY total_interactions DESC
+LIMIT 10
+
+26/10/19 09:30:25 INFO CatalystOptimizer: Physical Plan Generated:
+TakeOrderedAndProject(limit=10, orderBy=[total_interactions DESC NULLS LAST], output=[itemid#12,total_interactions#28L])
++- *(2) HashAggregate(keys=[itemid#12], functions=[count(event#11)])
+   +- Exchange hashpartitioning(itemid#12, 200)
+      +- *(1) HashAggregate(keys=[itemid#12], functions=[partial_count(event#11)])
+         +- *(1) FileScan csv [event#11,itemid#12] Batched: false, DataFilters: [], Format: CSV
+
+KẾT QUẢ TOP 10 SẢN PHẨM CÓ TỔNG LƯỢT TƯƠNG TÁC CAO NHẤT SÀN TMĐT:
++-------+------------------+
+| itemid|total_interactions|
++-------+------------------+
+| 461686|              2978|
+| 257040|              2256|
+| 384302|              1824|
+| 370653|              1733|
+| 268661|              1689|
+| 445351|              1541|
+| 119736|              1520|
+| 213834|              1439|
+| 312728|              1398|
+| 320130|              1345|
++-------+------------------+
+
+--- [3] LƯU KẾT QUẢ CHO GIAO DIỆN STREAMLIT ---
+Đường dẫn xuất kết quả: /spark/models/top_products_dir (Coalesce 1 file duy nhất)
+Đã lưu danh sách Top Sản phẩm tại thư mục: /spark/models/top_products_dir
+File CSV kết quả: part-00000-4fb822ca-1db3-4d6d-b085-14f041412285-c000.csv (Kích thước: 312 bytes)
+
+================================================================================
+KẾT LUẬN: ĐÃ TRÍCH XUẤT THÀNH CÔNG DANH SÁCH SẢN PHẨM HOT GIẢI QUYẾT BÀI TOÁN COLD-START
+================================================================================

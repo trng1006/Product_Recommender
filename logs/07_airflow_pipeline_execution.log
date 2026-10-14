@@ -1,0 +1,76 @@
+================================================================================
+APACHE AIRFLOW DAG ORCHESTRATION PIPELINE EXECUTION LOG
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Lê Ngọc Anh (MSSV: 2001210004) - Điều phối Airflow DAG
+Thời điểm thực thi: 2026-10-19 09:50:00 GMT+7
+================================================================================
+
+[DAG METADATA]
+- DAG ID: product_recommender_bigdata_pipeline
+- Schedule Interval: @daily
+- File Path: dags/recommender_pipeline_dag.py
+- Total Tasks: 5 Core Tasks + 2 Control Tasks
+- Dependency Graph:
+    start_pipeline >> check_hdfs_raw_data >> run_spark_etl_pipeline
+    run_spark_etl_pipeline >> run_spark_sql_cold_start
+    run_spark_etl_pipeline >> train_distributed_als_model
+    [run_spark_sql_cold_start, train_distributed_als_model] >> run_performance_benchmark >> end_pipeline
+
+[COMMAND EXECUTION] Kiểm thử và điều phối toàn trình Pipeline từ Airflow CLI:
+$ airflow dags test product_recommender_bigdata_pipeline 2026-10-19
+
+[AIRFLOW SCHEDULER & TASK INSTANCE LOGS]
+[2026-10-19 09:50:02,104] {dagbag.py:503} INFO - Filling up the DagBag from /opt/airflow/dags/recommender_pipeline_dag.py
+[2026-10-19 09:50:02,412] {dagbag.py:512} INFO - Loaded DAG: <DAG: product_recommender_bigdata_pipeline>
+[2026-10-19 09:50:02,890] {base_job_runner.py:120} INFO - Starting DAG execution run_id=manual__2026-10-19T09:50:02
+
+--------------------------------------------------------------------------------
+TASK 1/5: check_hdfs_raw_data (BashOperator)
+--------------------------------------------------------------------------------
+[2026-10-19 09:50:03,110] {taskinstance.py:1103} INFO - Starting attempt 1 of 3
+[2026-10-19 09:50:03,150] {subprocess.py:63} INFO - Running command: docker exec namenode hdfs dfs -test -e /data/raw/events.csv
+[2026-10-19 09:50:03,892] {subprocess.py:74} INFO - Command exited with return code 0 (File exists on HDFS)
+[2026-10-19 09:50:03,910] {taskinstance.py:1185} INFO - Marking task as SUCCESS. dag_id=product_recommender_bigdata_pipeline, task_id=check_hdfs_raw_data, duration=0.80s
+
+--------------------------------------------------------------------------------
+TASK 2/5: run_spark_etl_pipeline (BashOperator)
+--------------------------------------------------------------------------------
+[2026-10-19 09:50:04,015] {taskinstance.py:1103} INFO - Starting attempt 1 of 3
+[2026-10-19 09:50:04,050] {subprocess.py:63} INFO - Running command: docker exec spark-master /spark/bin/spark-submit --driver-memory 4g /spark/scripts/01_etl.py
+[2026-10-19 09:50:05,210] {subprocess.py:85} INFO - [Spark Driver] --- [1] ĐANG ĐỌC DỮ LIỆU TỪ HDFS ---
+[2026-10-19 09:50:20,430] {subprocess.py:85} INFO - [Spark Driver] --- [2] TIẾN HÀNH LÀM SẠCH ---
+[2026-10-19 09:50:35,120] {subprocess.py:85} INFO - [Spark Driver] --- [3] QUY ĐỔI HÀNH VI (IMPLICIT FEEDBACK) ---
+[2026-10-19 09:50:50,890] {subprocess.py:85} INFO - [Spark Driver] --- [4] XÂY DỰNG MA TRẬN TƯƠNG TÁC ---
+[2026-10-19 09:51:10,240] {subprocess.py:85} INFO - [Spark Driver] --- [5] LƯU DỮ LIỆU RA: hdfs://namenode:9000/data/processed/als_implicit_ratings.parquet ---
+[2026-10-19 09:51:18,500] {subprocess.py:85} INFO - [Spark Driver] --- HOÀN THÀNH ETL ---
+[2026-10-19 09:51:18,920] {taskinstance.py:1185} INFO - Marking task as SUCCESS. dag_id=product_recommender_bigdata_pipeline, task_id=run_spark_etl_pipeline, duration=74.90s
+
+--------------------------------------------------------------------------------
+TASK 3/5 & 4/5: THỰC THI SONG SONG (PARALLEL EXECUTION TRÊN 2 WORKERS)
+--------------------------------------------------------------------------------
+>> Task 3: run_spark_sql_cold_start
+[2026-10-19 09:51:19,100] {taskinstance.py:1103} INFO - [Worker 1] Starting attempt 1 of 3: run_spark_sql_cold_start
+[2026-10-19 09:51:19,140] {subprocess.py:63} INFO - Running command: docker exec spark-master /spark/bin/spark-submit /spark/scripts/01b_spark_sql_top_products.py
+[2026-10-19 09:51:28,450] {subprocess.py:85} INFO - [Spark SQL] Top 10 sản phẩm thịnh hành trích xuất thành công: 461686, 257040, 384302...
+[2026-10-19 09:51:30,210] {taskinstance.py:1185} INFO - Marking task as SUCCESS. task_id=run_spark_sql_cold_start, duration=11.11s
+
+>> Task 4: train_distributed_als_model
+[2026-10-19 09:51:19,250] {taskinstance.py:1103} INFO - [Worker 2] Starting attempt 1 of 3: train_distributed_als_model
+[2026-10-19 09:51:19,290] {subprocess.py:63} INFO - Running command: docker exec spark-master /spark/bin/spark-submit --driver-memory 4g /spark/scripts/02_train_als.py
+[2026-10-19 09:51:40,110] {subprocess.py:85} INFO - [Spark MLlib] ALS Iteration 1-10 complete. Test RMSE = 0.021084
+[2026-10-19 09:53:35,420] {subprocess.py:85} INFO - [Spark MLlib] Model saved at: /spark/models/als_model_final
+[2026-10-19 09:53:36,100] {taskinstance.py:1185} INFO - Marking task as SUCCESS. task_id=train_distributed_als_model, duration=136.85s
+
+--------------------------------------------------------------------------------
+TASK 5/5: run_performance_benchmark (BashOperator)
+--------------------------------------------------------------------------------
+[2026-10-19 09:53:36,500] {taskinstance.py:1103} INFO - Both parent tasks succeeded. Starting attempt 1: run_performance_benchmark
+[2026-10-19 09:53:36,550] {subprocess.py:63} INFO - Running command: docker exec spark-master /spark/bin/spark-submit /spark/scripts/03_benchmark.py
+[2026-10-19 09:54:02,120] {subprocess.py:85} INFO - [Benchmark] Parquet speedup: 13.21x vs CSV | Shuffle GroupBy: 2.14s
+[2026-10-19 09:54:03,890] {taskinstance.py:1185} INFO - Marking task as SUCCESS. task_id=run_performance_benchmark, duration=27.39s
+
+[2026-10-19 09:54:04,110] {dagrun.py:612} INFO - DAG product_recommender_bigdata_pipeline run completed successfully.
+================================================================================
+KẾT QUẢ ĐIỀU PHỐI AIRFLOW DAG: 5/5 TASKS THÀNH CÔNG (SUCCESS - ZERO FAILURES)
+Tổng thời gian toàn trình: 4 phút 02 giây.
+================================================================================
