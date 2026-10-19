@@ -97,7 +97,7 @@ def create_cuoiky_docx():
     tbl_info.alignment = WD_TABLE_ALIGNMENT.CENTER
     info = [
         ("Giảng viên phụ trách:", "Bộ môn Khoa học Dữ liệu & Trí tuệ Nhân tạo (HUIT)"),
-        ("Nhóm sinh viên thực hiện:", "Nhóm 4 thành viên:\n1. Tăng Gia Huy (MSSV: 2001210001)\n2. Trần Phương (MSSV: 2001210002)\n3. Trần Bảo Nguyên (MSSV: 2001210003)\n4. Lê Ngọc Anh (MSSV: 2001210004)"),
+        ("Nhóm sinh viên thực hiện:", "Nhóm 4 thành viên:\n1. Tăng Gia Huy (MSSV: 2001230313)\n2. Trần Thị Minh Phương (MSSV: 2001230704)\n3. Trần Bảo Nguyên (MSSV: 2001230587)\n4. Lê Ngọc Anh (MSSV: 2001230017)"),
         ("Tập dữ liệu áp dụng:", "RetailRocket E-Commerce Dataset (1.4 GB / 2,756,101 bản ghi tương tác)"),
         ("Các công nghệ tích hợp:", "Hadoop HDFS (2 DataNodes), Apache Spark (2 Workers), Spark MLlib (ALS), Apache Airflow (DAG), Kafka Streaming, Streamlit Serving"),
         ("Cơ chế xử lý dữ liệu:", "Batch Processing tối ưu hóa bằng Parquet Snappy + Thiết kế mở rộng Real-time Streaming"),
@@ -134,10 +134,10 @@ def create_cuoiky_docx():
         set_cell_background(c, "0D47A1")
 
     members = [
-        ("Tăng Gia Huy\nMSSV: 2001210001", "Hạ tầng HDFS & Ingestion Streaming", "Khởi tạo Docker Cluster (1 NameNode + 2 DataNodes), quản lý 12 blocks 128MB, replication factor=2, script 00_init_hdfs.sh, kiểm tra fsck chịu lỗi, Kafka Producer & Consumer", "100% (Hoàn thành xuất sắc)"),
-        ("Trần Phương\nMSSV: 2001210002", "Xử lý Phân tán & Spark ETL", "Lập trình PySpark ETL (01_etl.py), làm sạch 2.75M dòng, khử null/duplicate, Implicit Scoring (View=1, Cart=2, Buy=3), tối ưu Shuffle và lưu Parquet Snappy", "100% (Hoàn thành xuất sắc)"),
-        ("Trần Bảo Nguyên\nMSSV: 2001210003", "Spark MLlib ALS & Benchmark", "Toán học Matrix Factorization, huấn luyện ALS trên 2 Workers (02_train_als.py), hội tụ RMSE ~ 0.021, đo kiểm hiệu năng CSV vs Parquet (03_benchmark.py)", "100% (Hoàn thành xuất sắc)"),
-        ("Lê Ngọc Anh\nMSSV: 2001210004", "Airflow DAG, Cold-Start & Serving", "Thiết kế DAG Airflow 5 tasks (recommender_pipeline_dag.py), khắc phục Cold-Start bằng Spark SQL (01b_spark_sql_top_products.py), dựng Web App Streamlit (app.py)", "100% (Hoàn thành xuất sắc)")
+        ("Tăng Gia Huy\nMSSV: 2001230313", "Hạ tầng HDFS & Ingestion Streaming", "Khởi tạo Docker Cluster (1 NameNode + 2 DataNodes), quản lý 12 blocks 128MB, replication factor=2, script 00_init_hdfs.sh, kiểm tra fsck chịu lỗi, Kafka Producer & Consumer", "100% (Hoàn thành xuất sắc)"),
+        ("Trần Thị Minh Phương\nMSSV: 2001230704", "Xử lý Phân tán & Spark ETL", "Lập trình PySpark ETL (01_etl.py), làm sạch 2.75M dòng, khử null/duplicate, Implicit Scoring (View=1, Cart=2, Buy=3), tối ưu Shuffle và lưu Parquet Snappy", "100% (Hoàn thành xuất sắc)"),
+        ("Trần Bảo Nguyên\nMSSV: 2001230587", "Spark MLlib ALS & Benchmark", "Toán học Matrix Factorization, huấn luyện ALS trên 2 Workers (02_train_als.py), hội tụ RMSE ~ 0.021, đo kiểm hiệu năng CSV vs Parquet (03_benchmark.py)", "100% (Hoàn thành xuất sắc)"),
+        ("Lê Ngọc Anh\nMSSV: 2001230017", "Airflow DAG, Cold-Start & Serving", "Thiết kế DAG Airflow 5 tasks (recommender_pipeline_dag.py), khắc phục Cold-Start bằng Spark SQL (01b_spark_sql_top_products.py), dựng Web App Streamlit (app.py)", "100% (Hoàn thành xuất sắc)")
     ]
     for r_idx, row in enumerate(members, start=1):
         for c_idx, val in enumerate(row):
@@ -375,7 +375,7 @@ def create_cuoiky_pdf():
 
     info_data = [
         [Paragraph("Giảng viên hướng dẫn:", style_tbl_b), Paragraph("Bộ môn Khoa học Dữ liệu & Trí tuệ Nhân tạo (HUIT)", style_tbl_c)],
-        [Paragraph("Nhóm thực hiện:", style_tbl_b), Paragraph("Nhóm 4 thành viên:<br/>1. Tăng Gia Huy (MSSV: 2001210001) - Hạ tầng HDFS & Ingestion<br/>2. Trần Phương (MSSV: 2001210002) - Spark ETL & Parquet<br/>3. Trần Bảo Nguyên (MSSV: 2001210003) - Spark MLlib ALS & Benchmark<br/>4. Lê Ngọc Anh (MSSV: 2001210004) - Airflow DAG & Streamlit", style_tbl_c)],
+        [Paragraph("Nhóm thực hiện:", style_tbl_b), Paragraph("Nhóm 4 thành viên:<br/>1. Tăng Gia Huy (MSSV: 2001230313) - Hạ tầng HDFS & Ingestion<br/>2. Trần Thị Minh Phương (MSSV: 2001230704) - Spark ETL & Parquet<br/>3. Trần Bảo Nguyên (MSSV: 2001230587) - Spark MLlib ALS & Benchmark<br/>4. Lê Ngọc Anh (MSSV: 2001230017) - Airflow DAG & Streamlit", style_tbl_c)],
         [Paragraph("Tập dữ liệu:", style_tbl_b), Paragraph("RetailRocket E-Commerce Recommender System (1.4 GB / 2.75M rows)", style_tbl_c)],
         [Paragraph("Công nghệ triển khai:", style_tbl_b), Paragraph("Hadoop HDFS (2 DataNodes), Apache Spark Cluster (2 Workers), PySpark MLlib ALS, Airflow DAG, Kafka Streaming, Streamlit", style_tbl_c)],
         [Paragraph("Điểm nổi bật kỹ thuật:", style_tbl_b), Paragraph("Mô hình ALS RMSE ~ 0.021 (vượt trội Baseline 0.085), Parquet giảm 94.9% dung lượng và tăng tốc nạp 13.2 lần", style_tbl_c)],

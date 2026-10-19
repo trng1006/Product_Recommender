@@ -190,10 +190,10 @@ def build_all_slides():
     p3.font.color.rgb = RGBColor(227, 242, 253)
 
     cols_s1 = [
-        ("TĂNG GIA HUY\n(2001210001)", ["Hạ tầng HDFS & Ingestion", "1 NameNode + 2 DataNodes", "12 Blocks (128MB), Rep=2", "Kafka Streaming Ingestion"]),
-        ("TRẦN PHƯƠNG\n(2001210002)", ["Xử lý Phân tán & Spark ETL", "Làm sạch 2.75M dòng", "Implicit Scoring (1/2/3)", "Nén Parquet Snappy (01_etl.py)"]),
-        ("TRẦN BẢO NGUYÊN\n(2001210003)", ["Spark MLlib ALS & Benchmark", "Matrix Factorization k=10", "Hội tụ RMSE ~ 0.02108", "Đo kiểm CSV vs Parquet (13.2x)"]),
-        ("LÊ NGỌC ANH\n(2001210004)", ["Airflow DAG & Serving UI", "Spark SQL Top 10 Cold-Start", "Airflow DAG (5 tasks liên hoàn)", "Serving Web Streamlit (app.py)"])
+        ("TĂNG GIA HUY\n(2001230313)", ["Hạ tầng HDFS & Ingestion", "1 NameNode + 2 DataNodes", "12 Blocks (128MB), Rep=2", "Kafka Streaming Ingestion"]),
+        ("TRẦN THỊ MINH PHƯƠNG\n(2001230704)", ["Xử lý Phân tán & Spark ETL", "Làm sạch 2.75M dòng", "Implicit Scoring (1/2/3)", "Nén Parquet Snappy (01_etl.py)"]),
+        ("TRẦN BẢO NGUYÊN\n(2001230587)", ["Spark MLlib ALS & Benchmark", "Matrix Factorization k=10", "Hội tụ RMSE ~ 0.02108", "Đo kiểm CSV vs Parquet (13.2x)"]),
+        ("LÊ NGỌC ANH\n(2001230017)", ["Airflow DAG & Serving UI", "Spark SQL Top 10 Cold-Start", "Airflow DAG (5 tasks liên hoàn)", "Serving Web Streamlit (app.py)"])
     ]
     for i, (t, b) in enumerate(cols_s1):
         add_card(s1, 0.6 + i * 3.08, 3.9, 2.9, 3.1, t, b, HUIT_BLUE)
