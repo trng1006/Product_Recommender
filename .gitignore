@@ -1,15 +1,25 @@
-# Ignore data and models
+# Dữ liệu lớn (Không đẩy lên Git để tránh quá tải)
 data/raw/*
+!data/raw/.gitkeep
 data/processed/*
+!data/processed/.gitkeep
 models/*
+!models/.gitkeep
+!models/top_products_dir/
+models.7z
 
-# Ignore python caches and environments
+# Môi trường và bộ đệm Python
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
 .venv/
 venv/
+.spark_temp/
 .env
 
-# Ignore OS files
+# Hệ điều hành
 .DS_Store
+
+# Cho phép theo dõi thư mục logs minh chứng
+!logs/
+!logs/*.log

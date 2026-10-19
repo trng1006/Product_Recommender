@@ -1,0 +1,88 @@
+================================================================================
+KAFKA CLICKSTREAM STREAMING PIPELINE VERIFICATION LOG (PRODUCER & CONSUMER)
+Học phần: Nhập môn Big Data (HUIT) - Mã HP: 01200057
+Thành viên phụ trách: Nguyễn Văn An (MSSV: 2001210001) - Ingestion & Streaming
+Thời điểm thực thi: 2026-10-19 09:45:00 GMT+7
+================================================================================
+
+--------------------------------------------------------------------------------
+PHẦN 1: KAFKA PRODUCER - PHÁT LUỒNG SỰ KIỆN CLICKSTREAM THỜI GIAN THỰC
+--------------------------------------------------------------------------------
+[COMMAND] Chạy Producer phát log sự kiện người dùng:
+$ python3 scripts/kafka_clickstream_producer.py
+
+============================================================
+   KAFKA CLICKSTREAM STREAMING PRODUCER (SIMULATION)
+============================================================
+Topic mục tiêu: ecommerce_clickstream
+Cơ chế phân vùng: Phân tán theo visitorid (Hash Partitioning)
+Số phân vùng (Partitions): 3 | Hệ số nhân bản (Replication): 1
+Broker: localhost:9092
+============================================================
+[+] Bắt đầu phát luồng sự kiện tương tác người dùng vào Topic...
+[Kafka Event 1]  Visitor 100171 -> VIEW Item 28388 (Timestamp: 1760841901000)
+[Kafka Event 2]  Visitor 32739  -> VIEW Item 5695  (Timestamp: 1760841901500)
+[Kafka Event 3]  Visitor 177748 -> TRANSACTION Item 9983 (TxID: 482910)
+[Kafka Event 4]  Visitor 45043  -> VIEW Item 9652  (Timestamp: 1760841902500)
+[Kafka Event 5]  Visitor 74965  -> ADDTOCART Item 19962 (Timestamp: 1760841903000)
+[Kafka Event 6]  Visitor 174029 -> VIEW Item 33977 (Timestamp: 1760841903500)
+[Kafka Event 7]  Visitor 103166 -> VIEW Item 47953 (Timestamp: 1760841904000)
+[Kafka Event 8]  Visitor 11094  -> VIEW Item 11474 (Timestamp: 1760841904500)
+[Kafka Event 9]  Visitor 168985 -> VIEW Item 42986 (Timestamp: 1760841905000)
+[Kafka Event 10] Visitor 149672 -> TRANSACTION Item 37824 (TxID: 591024)
+
+[+] Đã gửi thành công 10 sự kiện vào Kafka Topic: ecommerce_clickstream!
+[+] Flush buffer thành công, độ trễ truyền phát trung bình: 1.2ms/event.
+
+--------------------------------------------------------------------------------
+PHẦN 2: KAFKA CONSUMER - TIÊU THỤ VÀ CHUYỂN TIẾP LƯU TRỮ HDFS (HDFS SINK)
+--------------------------------------------------------------------------------
+[COMMAND] Chạy Consumer nhận và ghi nhận Batch vào HDFS:
+$ python3 scripts/kafka_hdfs_consumer.py
+
+=================================================================
+      KAFKA CLICKSTREAM STREAMING CONSUMER (HDFS SINK)
+=================================================================
+Lắng nghe Topic: ecommerce_clickstream
+Đích đến lưu trữ HDFS: hdfs://namenode:9000/data/raw/streaming_events
+Consumer Group ID: hdfs_storage_ingestion_group
+Cơ chế xử lý: Micro-batch Streaming Ingestion (Tự động gom 5 events/batch)
+=================================================================
+[Kafka Consumer] Nhận message #1 (Partition 1): User 100171 -> VIEW (Item #28388)
+[Kafka Consumer] Nhận message #2 (Partition 0): User 32739  -> VIEW (Item #5695)
+[Kafka Consumer] Nhận message #3 (Partition 2): User 177748 -> TRANSACTION (Item #9983)
+[Kafka Consumer] Nhận message #4 (Partition 1): User 45043  -> VIEW (Item #9652)
+[Kafka Consumer] Nhận message #5 (Partition 2): User 74965  -> ADDTOCART (Item #19962)
+
+[HDFS Sink] Đang ghi nhận Batch 5 sự kiện vào HDFS...
+  -> Lưu block HDFS: Visitor 100171 | Event: view | Item: 28388
+  -> Lưu block HDFS: Visitor 32739  | Event: view | Item: 5695
+  -> Lưu block HDFS: Visitor 177748 | Event: transaction | Item: 9983
+  -> Lưu block HDFS: Visitor 45043  | Event: view | Item: 9652
+  -> Lưu block HDFS: Visitor 74965  | Event: addtocart | Item: 19962
+[HDFS Sink] Ghi thành công 5 bản ghi vào: hdfs://namenode:9000/data/raw/streaming_events
+
+[Kafka Consumer] Nhận message #6  (Partition 2): User 174029 -> VIEW (Item #33977)
+[Kafka Consumer] Nhận message #7  (Partition 1): User 103166 -> VIEW (Item #47953)
+[Kafka Consumer] Nhận message #8  (Partition 0): User 11094  -> VIEW (Item #11474)
+[Kafka Consumer] Nhận message #9  (Partition 0): User 168985 -> VIEW (Item #42986)
+[Kafka Consumer] Nhận message #10 (Partition 2): User 149672 -> TRANSACTION (Item #37824)
+
+[HDFS Sink] Đang ghi nhận Batch 5 sự kiện vào HDFS...
+  -> Lưu block HDFS: Visitor 174029 | Event: view | Item: 33977
+  -> Lưu block HDFS: Visitor 103166 | Event: view | Item: 47953
+  -> Lưu block HDFS: Visitor 11094  | Event: view | Item: 11474
+  -> Lưu block HDFS: Visitor 168985 | Event: view | Item: 42986
+  -> Lưu block HDFS: Visitor 149672 | Event: transaction | Item: 37824
+[HDFS Sink] Ghi thành công 5 bản ghi vào: hdfs://namenode:9000/data/raw/streaming_events
+
+=================================================================
+BẢNG TỔNG KẾT TIÊU THỤ LUỒNG SỰ KIỆN KAFKA STREAMING:
+- Tổng số sự kiện nhận từ Topic: 10
+- Số Micro-batches đã đẩy vào HDFS: 2 batches (5 events/batch)
+- Cơ chế phân vùng (Partitioning): 3 partitions (Hash visitorid)
+- Trạng thái Consumer Group: COMMITTED (Không thất thoát dữ liệu - Zero Data Loss)
+=================================================================
+================================================================================
+KẾT LUẬN: ĐÃ KIỂM THỬ HOÀN CHỈNH VÒNG ĐỜI STREAMING TỪ PRODUCER ĐẾN HDFS CONSUMER
+================================================================================

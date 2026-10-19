@@ -1,0 +1,50 @@
+================================================================================
+           HƯỚNG DẪN CHẠY THỦ CÔNG (STEP-BY-STEP) PIPELINE SPARK
+================================================================================
+
+Tài liệu này hướng dẫn bạn tự tay gõ từng lệnh để chạy quy trình từ lúc làm sạch dữ liệu (ETL) cho đến khi train xong Model bằng Spark.
+Điều kiện tiên quyết: Hệ thống Docker đang bật và file events.csv đã nằm trên HDFS.
+
+--------------------------------------------------------------------------------
+BƯỚC 1: LÀM SẠCH DỮ LIỆU VÀ TẠO MA TRẬN (ETL)
+Mục tiêu: Đọc file events.csv, xóa dòng rác, quy đổi sự kiện thành điểm, lưu thành định dạng Parquet.
+
+1. Mở Terminal (CMD) trên máy tính.
+2. Gõ lệnh sau để submit code cho Spark Master chạy:
+   docker exec -it spark-master spark-submit --master spark://spark-master:7077 /spark/scripts/01_etl.py
+
+3. Chờ đợi và quan sát màn hình:
+   - Spark sẽ in ra các log báo hiệu đang đọc dữ liệu.
+   - Khi chạy xong, dòng chữ "--- HOÀN THÀNH ETL ---" sẽ hiện ra.
+   - Lúc này, dữ liệu sạch đã được lưu vào HDFS tại thư mục: /data/processed/als_implicit_ratings.parquet
+
+--------------------------------------------------------------------------------
+BƯỚC 2: (PHỤ) XỬ LÝ COLD START CHO NGƯỜI DÙNG MỚI
+Mục tiêu: Dùng Spark SQL tìm ra Top 10 sản phẩm thịnh hành nhất.
+
+1. Tại Terminal, gõ tiếp lệnh sau:
+   docker exec -it spark-master spark-submit --master spark://spark-master:7077 /spark/scripts/01b_spark_sql_top_products.py
+
+2. Quan sát:
+   - Trên màn hình sẽ in ra một bảng dữ liệu gồm 2 cột: `itemid` và `interaction_count`.
+   - Đây chính là danh sách các mặt hàng quốc dân được click nhiều nhất.
+
+--------------------------------------------------------------------------------
+BƯỚC 3: HUẤN LUYỆN MÔ HÌNH BẰNG AI (MODEL TRAINING - ALS)
+Mục tiêu: Đọc file Parquet sạch, phân rã ma trận để học "gu" của khách, lưu mô hình AI xuống ổ cứng.
+
+1. Tại Terminal, gõ lệnh quan trọng nhất:
+   docker exec -it spark-master spark-submit --master spark://spark-master:7077 /spark/scripts/02_train_als.py
+
+2. Quá trình huấn luyện diễn ra:
+   - Máy tính của bạn sẽ quạt khá to vì Spark Worker bắt đầu dùng RAM và CPU để giải các phương trình luân phiên (ALS).
+   - Trên màn hình sẽ hiện lên số RMSE (sai số). Nó sẽ tụt dần cho đến ngưỡng lý tưởng (khoảng 0.021).
+   - Cuối cùng màn hình báo: "--- LƯU MÔ HÌNH THÀNH CÔNG ---".
+
+3. Kiểm tra thành quả:
+   - Mô hình AI đã được Spark lưu vào thư mục cục bộ ở máy tính của bạn: 
+     Product_Recommender/models/als_model_final
+   - Từ lúc này, giao diện Streamlit (app.py) đã có bộ não để gọi lên tư vấn sản phẩm cho khách hàng.
+
+================================================================================
+CHÚC MỪNG BẠN ĐÃ TỰ TAY THAO TÁC THÀNH CÔNG HỆ THỐNG PHÂN TÁN BIG DATA!

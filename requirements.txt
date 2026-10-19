@@ -1,6 +1,4 @@
-pyspark
 streamlit
 pandas
-matplotlib
-seaborn
-jupyterlab
+pyspark
+kafka-python
