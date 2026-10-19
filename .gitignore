@@ -24,3 +24,4 @@ venv/
 # Cho phép theo dõi thư mục logs minh chứng
 !logs/
 !logs/*.log
+logs/*/

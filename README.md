@@ -109,15 +109,21 @@ Product_Recommender/
 │   └── processed/                      # Kết quả Parquet sau tiền xử lý
 │
 ├── img/                                # Hình ảnh chụp màn hình minh chứng
-│   ├── 01_HDFS_Storage_WebUI.png       # NameNode Web UI 9870
-│   ├── 02_Spark_Master_WebUI.png       # Spark Master Web UI 8080 (2 Workers)
+│   ├── 01_HDFS_Storage_WebUI.png       # NameNode Web UI 9870 (2 DataNodes, Rep=2)
+│   ├── 02_Spark_Master_WebUI.png       # Spark Master Web UI 8080 (2 Workers ALIVE)
 │   ├── 03_Streamlit_App_Live_Serving.png # Giao diện Web Serving thời gian thực
-│   ├── 04_EDA_Interactions_Distribution.png # Phân bổ hành vi người dùng
-│   ├── 05_Model_Convergence_RMSE_Curve.png  # Đường cong hội tụ Loss RMSE
-│   ├── 06_Model_Comparison_ALS_vs_Baseline.png # So sánh ALS vs Baseline
-│   ├── 07_Benchmark_Storage_Comparison.png  # So sánh dung lượng CSV vs Parquet
-│   ├── 08_Benchmark_Read_Speed.png     # So sánh tốc độ đọc CSV vs Parquet
-│   └── 09_Top10_ColdStart_Products.png # Biểu đồ Top 10 sản phẩm bán chạy
+│   ├── 04_Streamlit_ColdStart_Serving.png # Giao diện xử lý Cold-Start Hybrid Fallback
+│   ├── 05_Streamlit_Architecture_Team.png # Kiến trúc Big Data & Danh sách 4 thành viên
+│   ├── 06_Streamlit_EDA_Stats.png      # Trực quan hóa thống kê tập dữ liệu EDA
+│   ├── 07_Airflow_Pipeline_WebUI.png   # Giao diện Web UI Apache Airflow (Port 8089)
+│   ├── 07_Airflow_Pipeline_DAG.png     # Sơ đồ điều phối 5 tasks tuần tự & song song
+│   ├── 08_Kafka_Streaming_Ingestion.png # Sơ đồ luồng Streaming Kafka Producer/Consumer
+│   ├── 4_EDA_Interactions.png          # Biểu đồ phân bổ hành vi người dùng
+│   ├── 5_Model_Convergence.png         # Đường cong hội tụ Loss RMSE
+│   ├── 6_Model_Comparison.png          # So sánh độ chính xác ALS vs Baseline
+│   ├── 7_Benchmark_Storage_Comparison.png # So sánh dung lượng CSV vs Parquet
+│   ├── 8_Benchmark_Read_Speed.png      # So sánh tốc độ đọc CSV vs Parquet
+│   └── 9_Top10_ColdStart_Products.png  # Biểu đồ Top 10 sản phẩm thịnh hành
 │
 ├── docs/                               # Tài liệu hướng dẫn, thuyết minh và phân công
 │   ├── KE_HOACH_PHAN_CONG_BAO_CAO_BIGDATA.md
@@ -228,8 +234,8 @@ Truy cập trình duyệt tại: `http://localhost:8501`.
 | **Spark SQL Cold-Start** | `scripts/01b_spark_sql_top_products.py` | `spark-submit /spark/scripts/01b_spark_sql_top_products.py` | `Đã lưu Top 10 sản phẩm tại models/top_products_dir` | `logs/03_spark_sql_top_products.log`, `img/09_Top10_ColdStart_Products.png` |
 | **Huấn luyện ALS MLlib** | `scripts/02_train_als.py` | `spark-submit --driver-memory 4g 02_train_als.py` | `Root-mean-square error (RMSE) = 0.02108` | `logs/04_spark_als_train.log`, `img/05_Model_Convergence_RMSE_Curve.png` |
 | **Đo kiểm Benchmark** | `scripts/03_benchmark.py` | `spark-submit /spark/scripts/03_benchmark.py` | `Parquet speedup: 13.21x vs CSV, giảm 94.9% dung lượng` | `logs/05_spark_benchmark.log`, `img/08_Benchmark_Read_Speed.png` |
-| **Kafka Streaming Ingestion** | `scripts/kafka_clickstream_producer.py`, `scripts/kafka_hdfs_consumer.py` | `python3 scripts/kafka_clickstream_producer.py` | `10 events -> topic 'ecommerce_clickstream' -> HDFS Sink` | `logs/06_kafka_streaming.log` |
-| **Điều phối Airflow DAG** | `dags/recommender_pipeline_dag.py` | `airflow dags test product_recommender_bigdata_pipeline` | `DAG run completed successfully: 5/5 tasks SUCCESS` | `logs/07_airflow_pipeline_execution.log` |
+| **Kafka Streaming Ingestion** | `scripts/kafka_clickstream_producer.py`, `scripts/kafka_hdfs_consumer.py` | `python3 scripts/kafka_clickstream_producer.py` | `10 events -> topic 'ecommerce_clickstream' -> HDFS Sink` | `logs/06_kafka_streaming.log`, `img/08_Kafka_Streaming_Ingestion.png` |
+| **Điều phối Airflow DAG** | `dags/recommender_pipeline_dag.py` | `airflow dags test product_recommender_bigdata_pipeline` | `DAG run completed successfully: 5/5 tasks SUCCESS` | `logs/07_airflow_pipeline_execution.log`, `img/07_Airflow_Pipeline_WebUI.png` |
 | **Serving Web UI Streamlit** | `app.py` | `streamlit run app.py (Port 8501)` | `Đã tìm thấy sản phẩm gợi ý cho User 147545 (Latency: <50ms)` | `img/03_Streamlit_App_Live_Serving.png` |
 
 ---
