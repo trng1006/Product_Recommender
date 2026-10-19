@@ -10,7 +10,7 @@
 
 | STT | Họ và Tên | Mã số Sinh viên (MSSV) | Trụ cột Kỹ thuật Big Data Phụ trách | Mức đóng góp |
 | :---: | :--- | :---: | :--- | :---: |
-| 1 | **Nguyễn Văn An** | `2001210001` | **Hạ tầng Phân tán HDFS & Ingestion Streaming** (Cluster Hadoop 2 DataNodes, Block 128MB, Rep=2, Kafka Producer/Consumer) | 100% |
+| 1 | **Tăng Gia Huy** | `2001210001` | **Hạ tầng Phân tán HDFS & Ingestion Streaming** (Cluster Hadoop 2 DataNodes, Block 128MB, Rep=2, Kafka Producer/Consumer) | 100% |
 | 2 | **Trần Phương** | `2001210002` | **Xử lý Dữ liệu Phân tán & Spark ETL** (PySpark ETL 2.75M dòng, Implicit Scoring, Tối ưu hóa Columnar Parquet Snappy) | 100% |
 | 3 | **Trần Bảo Nguyên** | `2001210003` | **Machine Learning Phân tán & Benchmark** (Spark MLlib ALS Matrix Factorization, RMSE Loss, Đo đạc định lượng CSV vs Parquet) | 100% |
 | 4 | **Lê Ngọc Anh** | `2001210004` | **Điều phối Pipeline & Serving UI** (Airflow DAG 5 tasks, Spark SQL Cold-Start, Streamlit Serving thời gian thực) | 100% |
