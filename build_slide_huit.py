@@ -178,22 +178,22 @@ def build_all_slides():
     p.space_after = Pt(6)
 
     p2 = tf1.add_paragraph()
-    p2.text = "HỆ KHUYẾN NGHỊ SẢN PHẨM TRÊN SÀN THƯƠNG MẠI ĐIỆN TỬ\nVỚI THUẬT TOÁN PHÂN TÁN ALS (APACHE SPARK & HADOOP HDFS)"
-    p2.font.size = Pt(21)
+    p2.text = "XÂY DỰNG HỆ THỐNG BIG DATA PHÂN TÁN CHO BÀI TOÁN KHUYẾN NGHỊ SẢN PHẨM\nDỰA TRÊN HADOOP HDFS, APACHE SPARK, AIRFLOW VÀ ALS MLLIB"
+    p2.font.size = Pt(20)
     p2.font.bold = True
     p2.font.color.rgb = WHITE
     p2.space_after = Pt(6)
 
     p3 = tf1.add_paragraph()
-    p3.text = "Bộ dữ liệu: RetailRocket E-Commerce (1.4 GB | 2,756,101 dòng tương tác | 1.4M Users x 235K Items)"
-    p3.font.size = Pt(12.5)
+    p3.text = "Bộ dữ liệu: RetailRocket E-Commerce (1.4 GB | 2,756,101 dòng tương tác | 1 NameNode + 2 DataNodes | 1 Master + 2 Spark Workers)"
+    p3.font.size = Pt(12)
     p3.font.color.rgb = RGBColor(227, 242, 253)
 
     cols_s1 = [
-        ("THÀNH VIÊN 1", ["Hạ tầng Phân tán HDFS", "1 NameNode + 2 DataNodes", "12 Blocks (128MB), Rep=2", "docker-compose, 00_init_hdfs"]),
-        ("THÀNH VIÊN 2", ["Xử lý Phân tán & Spark ETL", "Làm sạch rác, khử trùng lặp", "Narrow vs Wide (Shuffle)", "Parquet Snappy (01_etl.py)"]),
-        ("THÀNH VIÊN 3", ["Học máy Spark MLlib ALS", "Matrix Factorization", "Implicit ALS (10 vòng lặp)", "Hội tụ RMSE ~ 0.021"]),
-        ("THÀNH VIÊN 4", ["Serving & Benchmark", "Spark SQL Top 10 Cold-Start", "Đo kiểm CSV vs Parquet", "Web Streamlit (app.py)"])
+        ("NGUYỄN VĂN AN\n(2001210001)", ["Hạ tầng HDFS & Ingestion", "1 NameNode + 2 DataNodes", "12 Blocks (128MB), Rep=2", "Kafka Streaming Ingestion"]),
+        ("TRẦN PHƯƠNG\n(2001210002)", ["Xử lý Phân tán & Spark ETL", "Làm sạch 2.75M dòng", "Implicit Scoring (1/2/3)", "Nén Parquet Snappy (01_etl.py)"]),
+        ("TRẦN BẢO NGUYÊN\n(2001210003)", ["Spark MLlib ALS & Benchmark", "Matrix Factorization k=10", "Hội tụ RMSE ~ 0.02108", "Đo kiểm CSV vs Parquet (13.2x)"]),
+        ("LÊ NGỌC ANH\n(2001210004)", ["Airflow DAG & Serving UI", "Spark SQL Top 10 Cold-Start", "Airflow DAG (5 tasks liên hoàn)", "Serving Web Streamlit (app.py)"])
     ]
     for i, (t, b) in enumerate(cols_s1):
         add_card(s1, 0.6 + i * 3.08, 3.9, 2.9, 3.1, t, b, HUIT_BLUE)
@@ -310,13 +310,13 @@ def build_all_slides():
 
     # SLIDE 6
     s6 = prs.slides[5]
-    add_header(s6, "PHẦN 3: KIẾN TRÚC HỆ THỐNG (2 - 3 PHÚT)", "3.1. SƠ ĐỒ DATA PIPELINE TỔNG THỂ (5 BƯỚC KHÉP KÍN)", 6)
+    add_header(s6, "PHẦN 3: KIẾN TRÚC HỆ THỐNG (2 - 3 PHÚT)", "3.1. SƠ ĐỒ PIPELINE & ĐIỀU PHỐI AIRFLOW DAG (5 BƯỚC KHÉP KÍN)", 6)
     steps = [
-        ("BƯỚC 1: INGESTION", ["Script: 00_init_hdfs.sh", "Đẩy 1.4 GB events.csv lên HDFS (/data/raw).", "NameNode băm thành 12 Blocks (128MB).", "Replication = 2 (24 Blocks vật lý)."], HUIT_DARK),
-        ("BƯỚC 2: SPARK ETL", ["Script: 01_etl.py", "Đọc CSV phân tán từ HDFS.", "Làm sạch dropna, dropDuplicates.", "Gán điểm View=1, Cart=2, Buy=3.", "Lưu Parquet nén Snappy."], HUIT_BLUE),
-        ("BƯỚC 3: SPARK SQL", ["Script: 01b_spark_sql_top_products.py", "Tạo bảng tạm events_table.", "Dùng Catalyst Optimizer tìm Top 10 SP tương tác cao nhất.", "Giải quyết bài toán Cold-Start."], ORANGE_ACCENT),
-        ("BƯỚC 4: SPARK MLLIB", ["Script: 02_train_als.py", "Đọc Parquet sạch.", "Huấn luyện Implicit ALS (10 vòng lặp).", "Hội tụ RMSE ~ 0.021, lưu model xuống /spark/models."], GREEN_ACCENT),
-        ("BƯỚC 5: SERVING & UI", ["Script: 03_benchmark.py & app.py", "Đo kiểm tốc độ đọc.", "Web Streamlit nạp ALS Model suy diễn gợi ý mili-giây."], HUIT_DARK)
+        ("BƯỚC 1: INGESTION", ["Script: 00_init_hdfs.sh", "Đẩy 1.4 GB events.csv lên HDFS (/data/raw).", "12 Blocks (128MB), Rep=2.", "Mở rộng: Kafka Streaming (Producer & Consumer)."], HUIT_DARK),
+        ("BƯỚC 2: SPARK ETL", ["Script: 01_etl.py", "Đọc CSV phân tán từ HDFS.", "Làm sạch dropna, dropDuplicates.", "Gán điểm View=1, Cart=2, Buy=3.", "Lưu Parquet nén Snappy (72MB)."], HUIT_BLUE),
+        ("BƯỚC 3: SPARK SQL", ["Script: 01b_spark_sql.py", "Tạo bảng tạm events_table.", "Catalyst Optimizer tìm Top 10 SP tương tác cao nhất.", "Giải quyết triệt để Cold-Start."], ORANGE_ACCENT),
+        ("BƯỚC 4: SPARK MLLIB", ["Script: 02_train_als.py", "Đọc Parquet nén Snappy.", "Huấn luyện Implicit ALS 10 vòng.", "Hội tụ RMSE ~ 0.02108, lưu model vào /spark/models."], GREEN_ACCENT),
+        ("BƯỚC 5: AIRFLOW & UI", ["recommender_pipeline_dag.py", "Airflow điều phối 5 tasks tự động.", "03_benchmark.py (13.2x speedup).", "Web Streamlit phục vụ thời gian thực (app.py)."], HUIT_DARK)
     ]
     for i, (st_title, st_bullets, col_acc) in enumerate(steps):
         add_card(s6, 0.5 + i * 2.48, 1.6, 2.35, 5.4, st_title, st_bullets, col_acc)
@@ -420,18 +420,20 @@ def build_all_slides():
     s14 = prs.slides[13]
     add_header(s14, "PHẦN 6: KẾT LUẬN & Q&A (1 - 2 PHÚT)", "6.1. ĐÁNH GIÁ KẾT QUẢ, GIỚI HẠN & HƯỚNG MỞ RỘNG", 14)
     add_card(s14, 0.6, 1.6, 3.9, 5.4, "NHỮNG GÌ ĐÃ LÀM ĐƯỢC", [
-        "Hoàn chỉnh cụm Docker Hadoop HDFS & Spark phân tán.",
-        "Xử lý 2.75M dòng log; nén Parquet giảm 94.9% dung lượng, tăng tốc đọc 13.2 lần.",
-        "Mô hình ALS đạt RMSE ~ 0.021 (+75.3% so với Baseline), giải quyết triệt để Cold-Start."
+        "Hoàn chỉnh cụm Docker Hadoop HDFS (2 DataNodes) & Spark (2 Workers).",
+        "Xử lý 2.75M dòng log; Parquet giảm 94.9% dung lượng, tăng tốc đọc 13.2 lần.",
+        "Mô hình ALS đạt RMSE ~ 0.021 (+75.2% vs Baseline), khắc phục Cold-Start.",
+        "Tự động hóa bằng Airflow DAG (5/5 tasks SUCCESS), mô phỏng Kafka Streaming."
     ], GREEN_ACCENT)
     add_card(s14, 4.7, 1.6, 3.9, 5.4, "GIỚI HẠN PHẦN CỨNG", [
         "Containers chạy ảo hóa trên 1 máy cá nhân duy nhất (chia sẻ CPU và RAM).",
         "Dung lượng RAM cấp phát cho Spark Worker (6.7 GiB) giới hạn khi mở rộng dữ liệu lớn hơn.",
-        "Pipeline hiện tại hoạt động theo Batch Processing, chưa học ngay lập tức khi có click mới."
+        "Mô hình học máy ALS tính toán theo Batch định kỳ, chưa cập nhật ma trận theo micro-giây."
     ], ORANGE_ACCENT)
     add_card(s14, 8.8, 1.6, 3.9, 5.4, "HƯỚNG MỞ RỘNG (SCALE-OUT)", [
         "Mở rộng ngang: Triển khai trên nhiều máy chủ vật lý hoặc Cloud (AWS EMR / Dataproc).",
-        "Xử lý thời gian thực: Tích hợp Apache Kafka và Spark Structured Streaming cập nhật gợi ý tức thời."
+        "Xử lý thời gian thực: Tích hợp Apache Kafka và Spark Structured Streaming cập nhật gợi ý tức thời.",
+        "Tích hợp Deep Learning: Neural Collaborative Filtering (NCF) tăng cường độ chính xác."
     ], HUIT_BLUE)
 
     # SLIDE 15
@@ -460,7 +462,9 @@ def build_all_slides():
     add_card(s15, 1.2, 3.8, 10.93, 3.2, "CÁC CỔNG HỆ THỐNG ĐANG BẬT SẴN ĐỂ CHỨNG MINH TRỰC TIẾP", [
         "Hadoop HDFS NameNode UI: http://localhost:9870  (Kiểm tra Datanodes & Blocks 128MB)",
         "Apache Spark Master Web UI: http://localhost:8080  (Kiểm tra Workers, Jobs & đồ thị DAG)",
-        "Streamlit Recommender Web App: http://localhost:8501  (Trải nghiệm gợi ý ALS & Cold-Start)"
+        "Apache Airflow Orchestration UI: http://localhost:8089  (Kiểm tra đồ thị DAG 5 tasks)",
+        "Streamlit Recommender Web App: http://localhost:8501  (Trải nghiệm gợi ý ALS & Cold-Start)",
+        "Kafka Streaming Topic: 'ecommerce_clickstream'  (Kiểm thử Producer & Consumer)"
     ], HUIT_BLUE)
 
     prs.save(OUTPUT_PPTX)
