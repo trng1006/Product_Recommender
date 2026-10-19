@@ -19,6 +19,7 @@ venv/
 
 # Hệ điều hành
 .DS_Store
+~$*
 
 # Cho phép theo dõi thư mục logs minh chứng
 !logs/
