@@ -128,8 +128,7 @@ Product_Recommender/
 ├── app.py                              # Giao diện Web Streamlit hoàn chỉnh
 ├── docker-compose.yml                  # Cấu hình cụm Docker (Hadoop, Spark, Airflow)
 ├── hadoop.env                          # Biến môi trường hệ thống Hadoop
-├── requirements.txt                    # Thư viện Python yêu cầu
-└── build_cuoiky_reports.py             # Script tự động xuất Báo cáo PDF & Word chuẩn HUIT
+└── requirements.txt                    # Thư viện Python yêu cầu
 ```
 
 ---
